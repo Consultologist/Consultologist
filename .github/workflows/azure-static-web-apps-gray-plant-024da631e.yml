@@ -32,6 +32,14 @@ jobs:
           api_location: "/api" # Api source code path - optional
           output_location: "dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
+          # Dependabot-triggered runs are deliberately denied repository
+          # secrets by GitHub, so the deployment token is absent and this step
+          # would fail with "deployment_token was not provided" on every
+          # Dependabot PR regardless of what it changes. A permanently red
+          # check is worse than no check — it trains a reviewer to merge past
+          # red. With this set the site still builds and only the upload is
+          # skipped, so the build is real signal on the PRs that most need it.
+          skip_deploy_on_missing_secrets: true
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
