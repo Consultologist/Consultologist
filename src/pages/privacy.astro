@@ -1,8 +1,11 @@
 ---
 // Privacy policy for both consultologist.ai and app.consultologist.ai.
 // Adapted from a Termly-generated draft, corrected to match what the
-// services actually do. Reviewed by Tauheed before publishing; professional
-// legal review still recommended before wide release.
+// services actually do. 2026-09 pass: retention (§9), patient-text handling
+// (§4), sub-processors (§5), and security (§10) rewritten to state the actual
+// practices — seven-day text deletion, Canada East residency, encrypted-PDF
+// delivery, identity-based storage access. Reviewed by Tauheed before
+// publishing; professional legal review still recommended before wide release.
 import Layout from "../layouts/Layout.astro";
 import "../styles/research.css";
 ---
@@ -14,7 +17,7 @@ import "../styles/research.css";
     <article class="article-page">
         <header class="article-header">
             <h1>Privacy Policy</h1>
-            <p class="article-meta">Last updated July 9, 2026</p>
+            <p class="article-meta">Last updated September 13, 2026</p>
         </header>
         <div class="article-prose">
             <p>
@@ -56,7 +59,10 @@ import "../styles/research.css";
                     <strong>Do we process sensitive information?</strong> The application
                     processes clinical referral content submitted by physician users, which may
                     contain patient health information. We treat this with specific safeguards —
-                    see <a href="#referral-content">Section 4</a>.
+                    processing it in Canada, keeping it out of email and logs, and deleting the
+                    patient text seven days after a consult is finished. See
+                    <a href="#referral-content">Section 4</a> and <a href="#inforetain">Section
+                    9</a>.
                 </li>
                 <li>
                     <strong>Do we collect information from third parties?</strong> No. We do not
@@ -254,9 +260,28 @@ import "../styles/research.css";
                 </li>
                 <li>
                     Referral content and generated notes are processed and stored on Microsoft
-                    Azure infrastructure. Consult generation uses Microsoft Azure AI services
-                    (see <a href="#ai">Section 7</a>); the content is not used to train AI
-                    models.
+                    Azure infrastructure in the <strong>Canada East</strong> region — the region
+                    the application declares as the place your data is processed. Consult
+                    generation uses Microsoft Azure AI services (see <a href="#ai">Section 7</a>);
+                    the content is not used to train AI models.
+                </li>
+                <li>
+                    <strong>The patient text does not live on our systems for long.</strong> The
+                    referral content and the generated note are automatically deleted
+                    <strong>seven days after the consult is finished</strong>. What we retain
+                    afterwards is a record of the job — versions used and cryptographic hashes —
+                    that carries no patient text (see <a href="#inforetain">Section 9</a>).
+                </li>
+                <li>
+                    <strong>Delivery keeps patient text out of email.</strong> When a finished
+                    consult is delivered by email, the message itself contains no patient
+                    information; the note travels only as an <strong>optional, separately
+                    encrypted (AES-256) PDF</strong> that opens with a one-time delivery password.
+                </li>
+                <li>
+                    <strong>We do not log the clinical text.</strong> The referral content and the
+                    prompts built from it are not written to our operational or diagnostic logs in
+                    production.
                 </li>
                 <li>
                     We do not sell, share for marketing, or otherwise use referral content for
@@ -264,8 +289,9 @@ import "../styles/research.css";
                 </li>
                 <li>
                     The application keeps a history of consult generation jobs for the
-                    physician's own record and review; physicians can request deletion of their
-                    account and its data (see <a href="#request">Section 16</a>).
+                    physician's own record and review (the no-text job record described above);
+                    physicians can request deletion of their account and its data (see
+                    <a href="#request">Section 16</a>).
                 </li>
                 <li>
                     During early access, deployments are set up with each clinic so that data
@@ -294,12 +320,18 @@ import "../styles/research.css";
                     Application Insights)
                 </li>
                 <li>
-                    <strong>AI services:</strong> Microsoft Azure AI (consult draft generation —
-                    see <a href="#ai">Section 7</a>)
+                    <strong>AI services:</strong> Microsoft Azure AI — consult draft generation
+                    (see <a href="#ai">Section 7</a>) and Azure AI Document Intelligence, used to
+                    read text from image-only PDF uploads
                 </li>
                 <li>
                     <strong>Authentication:</strong> Microsoft Entra ID (Microsoft accounts) and
                     LinkedIn OAuth, when you use them to sign in to the application
+                </li>
+                <li>
+                    <strong>Organizational billing:</strong> the Microsoft commercial marketplace,
+                    where an organization activates and is billed for the application through its
+                    Microsoft account (when this option is enabled)
                 </li>
                 <li>
                     <strong>Email delivery:</strong> Azure Communication Services (contact-form
@@ -315,6 +347,12 @@ import "../styles/research.css";
                     <a href="#cookies">Section 6</a>)
                 </li>
             </ul>
+            <p>
+                Some components we operate ourselves within our own Microsoft Azure environment —
+                for example, the SNOMED CT terminology service the application checks concepts
+                against — are not third parties, and your information is not disclosed outside our
+                environment to use them.
+            </p>
             <p>We may also need to share personal information in the following situations:</p>
             <ul>
                 <li>
@@ -399,18 +437,33 @@ import "../styles/research.css";
 
             <h2 id="inforetain">9. How long do we keep your information?</h2>
             <p>
-                <em><strong>In short:</strong> for as long as necessary to provide the Services,
-                unless a longer period is required by law.</em>
+                <em><strong>In short:</strong> the patient text involved in a consult is deleted
+                a week after the consult is finished; account information is kept while your
+                account is active.</em>
             </p>
             <p>
-                We keep your personal information only as long as necessary for the purposes set
-                out in this notice, unless a longer retention period is required or permitted by
-                law. No purpose in this notice requires keeping your personal information longer
-                than the period in which you have an account with us. When we have no ongoing
-                legitimate business need to process your personal information, we will delete or
-                anonymize it — or, if that is not possible (for example, because it is held in
-                backup archives), we will securely store it, isolated from further processing,
-                until deletion is possible.
+                <strong>Referral content and generated notes.</strong> The clinical text involved
+                in a consult — the referral content you submit and the draft note the application
+                produces — is <strong>automatically deleted seven days after the consult
+                generation job completes</strong>, by a daily deletion sweep. After that, the
+                patient text is gone from our systems.
+            </p>
+            <p>
+                <strong>The job record we keep.</strong> For each consult we keep a record of the
+                job — timestamps, the model, package, and terminology versions used, and
+                cryptographic hashes of the inputs and outputs — so that the work remains
+                verifiable and auditable. Once the seven-day deletion has run, this record
+                <strong>no longer contains any patient text</strong>: the retained hashes attest
+                that a particular document was produced without preserving its contents.
+            </p>
+            <p>
+                <strong>Account and contact information.</strong> We keep the personal information
+                associated with your account (Section 1) for as long as your account is active and
+                as needed to provide the Services. When you close your account — or when we
+                otherwise have no ongoing legitimate business need to process your information — we
+                delete or anonymize it, or, if that is not immediately possible (for example,
+                because it is held in secure backup archives), we isolate it from further
+                processing until deletion is possible.
             </p>
 
             <h2 id="infosafe">10. How do we keep your information safe?</h2>
@@ -420,7 +473,29 @@ import "../styles/research.css";
             </p>
             <p>
                 We have implemented appropriate and reasonable technical and organisational
-                security measures designed to protect the personal information we process.
+                security measures designed to protect the personal information we process. These
+                include:
+            </p>
+            <ul>
+                <li>
+                    processing and storing data in Microsoft Azure's <strong>Canada East</strong>
+                    region, with encryption in transit and at rest;
+                </li>
+                <li>
+                    <strong>identity-based access to storage</strong> — our services reach data
+                    using managed identities rather than shared account keys;
+                </li>
+                <li>
+                    keeping the audit trail of what happened to a consult in application database
+                    records, not in diagnostic telemetry, and excluding the clinical text itself
+                    from operational logs; and
+                </li>
+                <li>
+                    deleting the patient text on a fixed schedule (Section 9), so the window in
+                    which it exists at all is short.
+                </li>
+            </ul>
+            <p>
                 However, no electronic transmission over the Internet or information storage
                 technology can be guaranteed to be completely secure, so we cannot promise that
                 unauthorised third parties will never defeat our security. Transmission of
